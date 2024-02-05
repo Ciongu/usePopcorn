@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import StarRating from "../StarRating/StarRating.js";
 import Loader from "../Loader/Loader";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
@@ -13,6 +13,8 @@ export default function SelectedMovie({
   const [error, setError] = useState(null);
   const [userRating, setUserRating] = useState("");
   const [movie, setMovie] = useState({});
+
+  const countRef = useRef(0);
 
   const isWatched = watchedMovies
     .map((movie) => movie.imdbId)
@@ -33,6 +35,13 @@ export default function SelectedMovie({
     Genre: genre,
     Director: director,
   } = movie;
+
+  useEffect(
+    function () {
+      if (userRating) countRef.current++;
+    },
+    [userRating]
+  );
 
   useEffect(
     function () {
@@ -103,6 +112,7 @@ export default function SelectedMovie({
       imdbRating: Number(imdbRating),
       runtime: Number(runtime.split(" ").at(0)),
       userRating: userRating,
+      countRatingDecisions: countRef.current,
     };
     onAddWatched(newWatchedMovie);
     onCloseMovie();
