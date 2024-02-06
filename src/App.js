@@ -1,6 +1,6 @@
 import NavBar from "./components/navbar/NavBar";
 import Main from "./components/Main/Main";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import NumResults from "./components/NumResults/NumResults";
 import Search from "./components/Search/Search";
 import Box from "./components/ListBox/ListBox";
@@ -10,20 +10,16 @@ import WatchedMovieList from "./components/WatchedList/WatchedMovieList";
 import Loader from "./components/Loader/Loader";
 import ErrorMessage from "./components/ErrorMessage/ErrorMessage";
 import SelectedMovie from "./components/SelectedMovie/selectedMovie";
-
-const APIkey = "675809bb";
+import { useMovies } from "./hooks/useMovies";
+import { useLocalStorageState } from "./hooks/useLocalStorageState";
 
 export default function App() {
-  const [movies, setMovies] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState(null);
 
-  const [watched, setWatched] = useState(function () {
-    const storedValue = localStorage.getItem("watched");
-    return JSON.parse(storedValue);
-  });
+  const [watched, setWatched] = useLocalStorageState([], "watched");
+
+  const { movies, error, isLoading } = useMovies(query);
 
   function handleSelectMovie(id) {
     setSelectedId(id === selectedId ? null : id);
@@ -40,46 +36,6 @@ export default function App() {
   function handleDeleteWatched(id) {
     setWatched((watched) => watched.filter((movie) => movie.imdbId !== id));
   }
-
-  useEffect(
-    function () {
-      async function fetchMovies() {
-        try {
-          setIsLoading(true);
-          setError(false);
-          const res = await fetch(
-            `http://www.omdbapi.com/?apikey=${APIkey}&s=${query}`
-          );
-
-          if (!res.ok)
-            throw new Error("Something went wrong with fetching movies");
-
-          const data = await res.json();
-          if (data.Response === "False") throw new Error("Movie not found");
-          setMovies(data.Search);
-        } catch (err) {
-          setError(err.message);
-        } finally {
-          setIsLoading(false);
-        }
-      }
-      if (query.length < 2) {
-        setMovies([]);
-        setError("");
-        return;
-      }
-      handleCloseMovie();
-      fetchMovies();
-    },
-    [query]
-  );
-
-  useEffect(
-    function () {
-      localStorage.setItem("watched", JSON.stringify(watched));
-    },
-    [watched]
-  );
 
   return (
     <>

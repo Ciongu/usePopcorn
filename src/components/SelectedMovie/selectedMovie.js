@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import StarRating from "../StarRating/StarRating.js";
 import Loader from "../Loader/Loader";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
+import { useKey } from "../../hooks/useKey.js";
 
 export default function SelectedMovie({
   movieId,
@@ -43,22 +44,7 @@ export default function SelectedMovie({
     [userRating]
   );
 
-  useEffect(
-    function () {
-      function callback(e) {
-        if (e.code === "Escape") {
-          onCloseMovie();
-        }
-      }
-
-      document.addEventListener("keydown", callback);
-
-      return function () {
-        document.removeEventListener("keydown", callback);
-      };
-    },
-    [onCloseMovie]
-  );
+  useKey("Escape", onCloseMovie);
 
   useEffect(
     function () {
@@ -73,14 +59,11 @@ export default function SelectedMovie({
 
   useEffect(
     function () {
-      const controller = new AbortController();
-
       setIsLoading(true);
       async function fetchMovie() {
         try {
           const res = await fetch(
-            `https://www.omdbapi.com/?apikey=675809bb&i=${movieId}`,
-            { signal: controller.signal }
+            `https://www.omdbapi.com/?apikey=675809bb&i=${movieId}`
           );
 
           if (!res.ok) throw new Error("Something went wrong. Try Again!");
@@ -96,10 +79,6 @@ export default function SelectedMovie({
         }
       }
       fetchMovie();
-
-      return function () {
-        controller.abort();
-      };
     },
     [movieId]
   );

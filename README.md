@@ -1,1 +1,1 @@
-A Movie Rater project made, while learning useEffect hook and exercising with useState.
+A Movie Rater project made, while learning useEffect, useRef hooks, creating custom hooks and exercising with useState.
